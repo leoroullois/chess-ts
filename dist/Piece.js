@@ -19,6 +19,9 @@ export class Piece {
     get name() {
         return this._name;
     }
+    get ball() {
+        return this._ball;
+    }
     /**
      * * Récupère la case de la pièce.
      * @returns la case (élément HTML) où se trouve la pièce
@@ -92,5 +95,32 @@ export class Piece {
             }
         });
         return myPiece;
+    }
+    /**
+     * ? changePosition("#A1",2,5) => "#C6"
+     * @param actualPos position actuelle (sous forme d'ID)
+     * @param i Nombre de lignes vers la droite
+     * @param j Nombre de colonnes vers le bas
+     * @returns nouvelle position (sous forme d'id)
+     */
+    changePos(actualPos, i = 0, j = 0) {
+        let coords = this.strToArr(actualPos);
+        //Afin de s'assurer que la pièce ne sorte pas de l'échiquier
+        if (0 <= coords[0] + i && coords[0] + i < 8) {
+            coords[0] += i;
+        }
+        else {
+            // Si la nouvelle position est en dehors de l'échiquier renvoyer undefined
+            return undefined;
+        }
+        //Afin de s'assurer que la pièce ne sorte pas de l'échiquier
+        if (0 <= coords[1] - j && coords[1] - j < 8) {
+            coords[1] -= j;
+        }
+        else {
+            // Si la nouvelle position est en dehors de l'échiquier renvoyer undefined
+            return undefined;
+        }
+        return this.arrToStr(coords);
     }
 }

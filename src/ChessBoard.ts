@@ -103,8 +103,8 @@ export class ChessBoard {
 		this._blackPawns = [pa, pb, pc, pd, pe, pf, pg, ph];
 		this._allPieces = this._blackPieces.concat(this._whitePieces);
 		this._allPieces.forEach((elt: Piece) => {
-			$(elt.currPos).on("click",elt.onClick);
-		})
+			$(elt.currPos).on("click", elt.onClick.bind(elt));
+		});
 	}
 	// Getters and setters
 	public get fen(): string {
@@ -195,9 +195,68 @@ export class ChessBoard {
 	public get allPieces(): Piece[] {
 		return this._allPieces;
 	}
+	public get whitePieces(): Piece[] {
+		return this._whitePieces;
+	}
+	public get blackPieces(): Piece[] {
+		return this._blackPieces;
+	}
 
 	getWhiteRoc() {}
 	getBlackRoc() {}
 	inCheck() {}
 	inCheckMate() {}
+
+	public addEvents(color: string): void {
+		if (color == "b") {
+			for (let k = 0; k < this.blackPieces.length; k++) {
+				if (this.blackPieces[k].currPos != "0") {
+					$(this.blackPieces[k].currPos).on(
+						"click",
+						this.blackPieces[k].onClick
+					);
+				}
+			}
+		} else {
+			for (let k = 0; k < this.whitePieces.length; k++) {
+				if (this.whitePieces[k].currPos != "0") {
+					$(this.whitePieces[k].currPos).on(
+						"click",
+						this.whitePieces[k].onClick
+					);
+				}
+			}
+		}
+	}
+	public removeEvents(color: string): void {
+		if (color == "black") {
+			for (let k = 0; k < this.blackPieces.length; k++) {
+				$(this.blackPieces[k].currPos).off(
+					"click",
+					this.blackPieces[k].onClick
+				);
+			}
+		} else {
+			for (let k = 0; k < this.whitePieces.length; k++) {
+				$(this.whitePieces[k].currPos).off("click", this.whitePieces[k].move);
+			}
+		}
+	}
+	/**
+	 * 
+	 * @returns 
+	 */
+	public otherPositions() : string[] {
+		let pieces : string[]= [];
+		for (let i = 0; i < this.chessBoard.length; i++) {
+			for (let j = 0; j < this.chessBoard[i].length; j++) {
+				const myPiece = $("#"+this.chessBoard[i][j]);
+				if (myPiece.html() == "") {
+					const id = myPiece.attr("id");
+					(id) && pieces.push(id);
+				}
+			}
+		}
+		return pieces;
+	}
 }

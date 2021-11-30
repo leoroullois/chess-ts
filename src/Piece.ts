@@ -24,6 +24,11 @@ export abstract class Piece {
 	public get name(): string {
 		return this._name;
 	}
+	
+	public get ball() : string {
+		return this._ball;
+	}
+	
 	/**
 	 * * Récupère la case de la pièce.
 	 * @returns la case (élément HTML) où se trouve la pièce
@@ -55,7 +60,7 @@ export abstract class Piece {
 	 * ? Une fois que onClick est déclenchée et que le joueur à décider de jouer un coup, move permet de gérer le mouvement de la pièce.
 	 */
 	public abstract move(): void;
-
+	public abstract getAllowedPos():JQuery[][]; 
 	public getID(id: string): string {
 		return `#${id}`;
 	}
@@ -98,7 +103,7 @@ export abstract class Piece {
 	 * @param id "#A1"
 	 * @returns la pièce se trouvant à l'id ou null
 	 */
-	displayPiece(id: string) : Piece | null {
+	public displayPiece(id: string): Piece | null {
 		let myPiece = null;
 		if (id == undefined) {
 			return myPiece;
@@ -107,7 +112,46 @@ export abstract class Piece {
 			if (elt.currPos == id) {
 				myPiece = elt;
 			}
-		})
+		});
 		return myPiece;
+	}
+	/**
+	 * ? changePosition("#A1",2,5) => "#C6"
+	 * @param actualPos position actuelle (sous forme d'ID)
+	 * @param i Nombre de lignes vers la droite
+	 * @param j Nombre de colonnes vers le bas
+	 * @returns nouvelle position (sous forme d'id)
+	 */
+	public changePos(
+		actualPos: string,
+		i: number = 0,
+		j: number = 0
+	): string | undefined {
+		let coords = this.strToArr(actualPos);
+		//Afin de s'assurer que la pièce ne sorte pas de l'échiquier
+		if (0 <= coords[0] + i && coords[0] + i < 8) {
+			coords[0] += i;
+		} else {
+			// Si la nouvelle position est en dehors de l'échiquier renvoyer undefined
+			return undefined;
+		}
+		//Afin de s'assurer que la pièce ne sorte pas de l'échiquier
+		if (0 <= coords[1] - j && coords[1] - j < 8) {
+			coords[1] -= j;
+		} else {
+			// Si la nouvelle position est en dehors de l'échiquier renvoyer undefined
+			return undefined;
+		}
+		return this.arrToStr(coords);
+	}
+
+	public removeBalls(): void {
+		for (let i = 0; i < newGame.chessBoard.length; i++) {
+			for (let j = 0; j < newGame.chessBoard[i].length; j++) {
+				if ($(this.getID(newGame.chessBoard[i][j])).html() == this.ball) {
+					$(this.getID(newGame.chessBoard[i][j])).html("");
+				}
+			}
+		}
 	}
 }

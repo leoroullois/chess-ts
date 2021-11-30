@@ -1,4 +1,5 @@
 import { Piece } from "../Piece.js";
+import { newGame } from "../app.js";
 export class Bishop extends Piece {
 	public constructor(color: string, currPos: string, name: string) {
 		super(color, currPos, name);

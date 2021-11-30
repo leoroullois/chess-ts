@@ -90,7 +90,7 @@ export class ChessBoard {
         this._blackPawns = [pa, pb, pc, pd, pe, pf, pg, ph];
         this._allPieces = this._blackPieces.concat(this._whitePieces);
         this._allPieces.forEach((elt) => {
-            $(elt.currPos).on("click", elt.onClick);
+            $(elt.currPos).on("click", elt.onClick.bind(elt));
         });
     }
     // Getters and setters
