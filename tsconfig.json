@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "outDir": "dist",
+        "noEmitOnError": true,
+        "target": "ES2015",
+        "strict": true,
+        "allowSyntheticDefaultImports": true,
+
+    },
+    "files": [
+        "src/ChessBoard.ts",
+        "src/app.ts",
+        "src/Piece.ts",
+        "src/pieces/Bishop.ts",
+        "src/pieces/King.ts",
+        "src/pieces/Knight.ts",
+        "src/pieces/Pawn.ts",
+        "src/pieces/Queen.ts",
+        "src/pieces/Rook.ts",
+    ]
+}
