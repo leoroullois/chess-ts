@@ -5,6 +5,7 @@ export class Piece {
         this._currPos = currPos;
         this._name = name;
         this._ball = '<div class="ball"></div>';
+        this.move = this.move.bind(this);
     }
     // ? Getters et setters
     get color() {
@@ -122,5 +123,29 @@ export class Piece {
             return undefined;
         }
         return this.arrToStr(coords);
+    }
+    removeBalls() {
+        for (let i = 0; i < newGame.chessBoard.length; i++) {
+            for (let j = 0; j < newGame.chessBoard[i].length; j++) {
+                const myCase = $(this.getID(newGame.chessBoard[i][j]));
+                if (myCase.html() == this.ball) {
+                    myCase.html("");
+                }
+                myCase.off();
+            }
+        }
+        newGame.addEvents(newGame.color);
+    }
+    getEmptyCases() {
+        let emptyCases = [];
+        for (let i = 0; i < newGame.chessBoard.length; i++) {
+            for (let j = 0; j < newGame.chessBoard[i].length; j++) {
+                const piece = $(this.getID(newGame.chessBoard[i][j]));
+                if ((piece === null || piece === void 0 ? void 0 : piece.html()) == "") {
+                    emptyCases.push(piece);
+                }
+            }
+        }
+        return emptyCases;
     }
 }

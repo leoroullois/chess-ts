@@ -1,3 +1,4 @@
+import { newGame } from "../app.js";
 import { Piece } from "../Piece.js";
 export class Pawn extends Piece {
     constructor(color, currPos, name) {
@@ -10,17 +11,54 @@ export class Pawn extends Piece {
     get count() {
         return this._count;
     }
+    set count(v) {
+        this._count = v;
+    }
     get promoted() {
         return this._promoted;
     }
-    get enPassant() {
+    get getEnPassant() {
         return this._enPassant;
     }
+    enPassant() { }
     onClick(e) {
-        console.log(e);
-        console.log(this.displayPiece("#G1"));
+        e.stopPropagation();
+        console.log("Début onClick(e) : ", this.displayPiece("#" + e.currentTarget.id));
+        newGame.clearEvents();
+        this.removeBalls();
+        newGame.addEvents(this.color);
+        $(this.currPos).off();
+        // Récup tous les coups possibles [["A1","A2"],["B3"]] avec les endroits vides et les endroits à attaquer
+        const allowedPos = this.getAllowedPos();
+        const positions = allowedPos[0].concat(allowedPos[1]);
+        this.displayBalls(allowedPos[0]);
+        positions.forEach((elt) => {
+            elt.on("click", this.move);
+        });
+        this.getEmptyCases().forEach((elt) => {
+            elt.on("click", () => {
+                this.removeBalls();
+                newGame.clearEvents();
+                newGame.addEvents(this.color);
+            });
+        });
     }
-    move() { }
+    move(e) {
+        e.stopPropagation();
+        console.log(e.currentTarget.id);
+        this.removeBalls();
+        $(this.currPos).children().appendTo(this.getID(e.currentTarget.id));
+        this.currPos = this.getID(e.currentTarget.id);
+        this.count++;
+        if (this.color === "b") {
+            newGame.color = "w";
+        }
+        else {
+            newGame.color = "b";
+        }
+        newGame.clearEvents();
+        newGame.addEvents((this.color === "b") ? "w" : "b");
+    }
     /**
      * ? Parité : 1 si noir, -1 si blanc
      * @returns -1 ou 1

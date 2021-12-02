@@ -6,6 +6,8 @@ export class Knight extends Piece {
 	}
 	public onClick(e: JQuery.ClickEvent): void {
 		console.log(e);
+		const allPos : JQuery<HTMLElement>[][] = this.getAllowedPos();
+		console.log(allPos);
 	}
 	public move(): void {}
 	public getAllowedPos(): JQuery<HTMLElement>[][] {

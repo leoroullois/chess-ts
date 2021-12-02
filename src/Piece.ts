@@ -10,6 +10,7 @@ export abstract class Piece {
 		this._currPos = currPos;
 		this._name = name;
 		this._ball = '<div class="ball"></div>';
+		this.move = this.move.bind(this);
 	}
 	// ? Getters et setters
 	public get color(): string {
@@ -59,7 +60,7 @@ export abstract class Piece {
 	 * ! Fonction très importante
 	 * ? Une fois que onClick est déclenchée et que le joueur à décider de jouer un coup, move permet de gérer le mouvement de la pièce.
 	 */
-	public abstract move(): void;
+	public abstract move(e:JQuery.ClickEvent): void;
 	public abstract getAllowedPos():JQuery[][]; 
 	public getID(id: string): string {
 		return `#${id}`;
@@ -92,7 +93,7 @@ export abstract class Piece {
 	 * ? Affiche des boules sur les cases du tableau
 	 * @param cases tableau d'éléments jQuery
 	 */
-	public displayBalls(cases: JQuery[]) {
+	public displayBalls(cases: JQuery<HTMLElement>[]):void {
 		cases?.forEach((elt: JQuery) => {
 			elt?.html(this._ball);
 		});
@@ -148,10 +149,25 @@ export abstract class Piece {
 	public removeBalls(): void {
 		for (let i = 0; i < newGame.chessBoard.length; i++) {
 			for (let j = 0; j < newGame.chessBoard[i].length; j++) {
-				if ($(this.getID(newGame.chessBoard[i][j])).html() == this.ball) {
-					$(this.getID(newGame.chessBoard[i][j])).html("");
+				const myCase = $(this.getID(newGame.chessBoard[i][j]));
+				if (myCase.html() == this.ball) {
+					myCase.html("");
+				}
+				myCase.off();
+			}
+		}
+		newGame.addEvents(newGame.color);
+	}
+	public getEmptyCases() : JQuery<HTMLElement>[] {
+		let emptyCases : JQuery<HTMLElement>[] = [];
+		for (let i=0; i<newGame.chessBoard.length; i++) {
+			for (let j=0; j<newGame.chessBoard[i].length; j++) {
+				const piece = $(this.getID(newGame.chessBoard[i][j]));
+				if(piece?.html()=="") {
+					emptyCases.push(piece);
 				}
 			}
 		}
+		return emptyCases;
 	}
 }

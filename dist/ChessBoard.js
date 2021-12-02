@@ -18,38 +18,38 @@ export class ChessBoard {
             ["A7", "B7", "C7", "D7", "E7", "F7", "G7", "H7"],
             ["A8", "B8", "C8", "D8", "E8", "F8", "G8", "H8"],
         ];
-        const pa = new Pawn("black", "#A7", "pa");
-        const pb = new Pawn("black", "#B7", "pb");
-        const pc = new Pawn("black", "#C7", "pc");
-        const pd = new Pawn("black", "#D7", "pd");
-        const pe = new Pawn("black", "#E7", "pe");
-        const pf = new Pawn("black", "#F7", "pf");
-        const pg = new Pawn("black", "#G7", "pg");
-        const ph = new Pawn("black", "#H7", "ph");
-        const ra = new Rook("black", "#A8", "ra");
-        const rh = new Rook("black", "#H8", "Z");
-        const kb = new Knight("black", "#B8", "Z");
-        const kg = new Knight("black", "#G8", "Z");
-        const bc = new Bishop("black", "#C8", "Z");
-        const bf = new Bishop("black", "#F8", "Z");
-        const ke = new King("black", "#E8", "Z");
-        const qd = new Queen("black", "#D8", "Z");
-        const Pa = new Pawn("white", "#A2", "Z");
-        const Pb = new Pawn("white", "#B2", "Z");
-        const Pc = new Pawn("white", "#C2", "Z");
-        const Pd = new Pawn("white", "#D2", "Z");
-        const Pe = new Pawn("white", "#E2", "Z");
-        const Pf = new Pawn("white", "#F2", "Z");
-        const Pg = new Pawn("white", "#G2", "Z");
-        const Ph = new Pawn("white", "#H2", "Z");
-        const Ra = new Rook("white", "#A1", "Z");
-        const Rh = new Rook("white", "#H1", "Z");
-        const Kb = new Knight("white", "#B1", "Z");
-        const Kg = new Knight("white", "#G1", "Z");
-        const Bc = new Bishop("white", "#C1", "Z");
-        const Bf = new Bishop("white", "#F1", "Z");
-        const Ke = new King("white", "#E1", "Z");
-        const Qd = new Queen("white", "#D1", "Z");
+        const pa = new Pawn("b", "#A7", "pa");
+        const pb = new Pawn("b", "#B7", "pb");
+        const pc = new Pawn("b", "#C7", "pc");
+        const pd = new Pawn("b", "#D7", "pd");
+        const pe = new Pawn("b", "#E7", "pe");
+        const pf = new Pawn("b", "#F7", "pf");
+        const pg = new Pawn("b", "#G7", "pg");
+        const ph = new Pawn("b", "#H7", "ph");
+        const ra = new Rook("b", "#A8", "ra");
+        const rh = new Rook("b", "#H8", "Z");
+        const kb = new Knight("b", "#B8", "Z");
+        const kg = new Knight("b", "#G8", "Z");
+        const bc = new Bishop("b", "#C8", "Z");
+        const bf = new Bishop("b", "#F8", "Z");
+        const ke = new King("b", "#E8", "Z");
+        const qd = new Queen("b", "#D8", "Z");
+        const Pa = new Pawn("w", "#A2", "Z");
+        const Pb = new Pawn("w", "#B2", "Z");
+        const Pc = new Pawn("w", "#C2", "Z");
+        const Pd = new Pawn("w", "#D2", "Z");
+        const Pe = new Pawn("w", "#E2", "Z");
+        const Pf = new Pawn("w", "#F2", "Z");
+        const Pg = new Pawn("w", "#G2", "Z");
+        const Ph = new Pawn("w", "#H2", "Z");
+        const Ra = new Rook("w", "#A1", "Z");
+        const Rh = new Rook("w", "#H1", "Z");
+        const Kb = new Knight("w", "#B1", "Z");
+        const Kg = new Knight("w", "#G1", "Z");
+        const Bc = new Bishop("w", "#C1", "Z");
+        const Bf = new Bishop("w", "#F1", "Z");
+        const Ke = new King("w", "#E1", "Z");
+        const Qd = new Queen("w", "#D1", "Z");
         this._blackPieces = [
             ra,
             rh,
@@ -110,7 +110,7 @@ export class ChessBoard {
                 this.fullMove;
     }
     get color() {
-        return this.fen.split(" ")[1];
+        return this._fen.split(" ")[1];
     }
     set color(v) {
         this._fen =
@@ -182,8 +182,70 @@ export class ChessBoard {
     get allPieces() {
         return this._allPieces;
     }
+    get whitePieces() {
+        return this._whitePieces;
+    }
+    get blackPieces() {
+        return this._blackPieces;
+    }
     getWhiteRoc() { }
     getBlackRoc() { }
     inCheck() { }
     inCheckMate() { }
+    addEvents(color) {
+        if (color == "b") {
+            for (let k = 0; k < this.blackPieces.length; k++) {
+                if (this.blackPieces[k].currPos != "0") {
+                    $(this.blackPieces[k].currPos).on("click", this.blackPieces[k].onClick.bind(this.blackPieces[k]));
+                }
+            }
+        }
+        else {
+            for (let k = 0; k < this.whitePieces.length; k++) {
+                if (this.whitePieces[k].currPos != "0") {
+                    $(this.whitePieces[k].currPos).on("click", this.whitePieces[k].onClick.bind(this.whitePieces[k]));
+                }
+            }
+        }
+    }
+    /**
+     * ? Supprime les événements des pièces de la couleur en argument
+     * @param color "b" ou "w"
+     */
+    removeEvents(color) {
+        if (color == "b") {
+            for (let k = 0; k < this.blackPieces.length; k++) {
+                $(this.blackPieces[k].currPos).off();
+            }
+        }
+        else {
+            for (let k = 0; k < this.whitePieces.length; k++) {
+                $(this.whitePieces[k].currPos).off();
+            }
+        }
+    }
+    clearEvents() {
+        for (let i = 0; i < this.chessBoard.length; i++) {
+            for (let j = 0; j < this.chessBoard[i].length; j++) {
+                $("#" + this.chessBoard[i][j]).off();
+            }
+        }
+    }
+    /**
+     *
+     * @returns
+     */
+    otherPositions() {
+        let pieces = [];
+        for (let i = 0; i < this.chessBoard.length; i++) {
+            for (let j = 0; j < this.chessBoard[i].length; j++) {
+                const myPiece = $("#" + this.chessBoard[i][j]);
+                if (myPiece.html() == "") {
+                    const id = myPiece.attr("id");
+                    id && pieces.push(id);
+                }
+            }
+        }
+        return pieces;
+    }
 }
