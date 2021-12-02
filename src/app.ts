@@ -35,3 +35,12 @@ console.log(newGameFen);
 
 export const newGame: ChessBoard = new ChessBoard();
 console.log(newGame.allPieces);
+const myBtn :JQuery<HTMLElement> = $("#rotate-board");
+const board :JQuery<HTMLElement> = $("#chess-board")
+myBtn.on("click",()=> {
+	board.toggleClass("active");
+	newGame.allPieces.forEach((elt) => {
+		$(elt.currPos).toggleClass("active");
+	})
+
+})

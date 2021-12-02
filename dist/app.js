@@ -32,3 +32,11 @@ const newGameFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 console.log(newGameFen);
 export const newGame = new ChessBoard();
 console.log(newGame.allPieces);
+const myBtn = $("#rotate-board");
+const board = $("#chess-board");
+myBtn.on("click", () => {
+    board.toggleClass("active");
+    newGame.allPieces.forEach((elt) => {
+        $(elt.currPos).toggleClass("active");
+    });
+});

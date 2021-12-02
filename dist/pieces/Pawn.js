@@ -1,3 +1,4 @@
+import { Queen } from "./Queen.js";
 import { newGame } from "../app.js";
 import { Piece } from "../Piece.js";
 export class Pawn extends Piece {
@@ -5,7 +6,7 @@ export class Pawn extends Piece {
         super(color, currPos, name);
         this._count = 0;
         this._promoted = false;
-        this._enPassant = false;
+        this._enPassant = { p1: null, p2: null };
     }
     // Getters and setters
     get count() {
@@ -17,37 +18,149 @@ export class Pawn extends Piece {
     get promoted() {
         return this._promoted;
     }
-    get getEnPassant() {
+    get enPassant() {
         return this._enPassant;
     }
-    enPassant() { }
+    set enPassant(v) {
+        this._enPassant = v;
+    }
+    getEnPassant() {
+        // TODO : bien vérifier que la case p1 ou p2 est vide !
+        return { p1: $(""), p2: $("") };
+    }
     onClick(e) {
         e.stopPropagation();
         console.log("Début onClick(e) : ", this.displayPiece("#" + e.currentTarget.id));
-        newGame.clearEvents();
+        this.clearEvents();
         this.removeBalls();
-        newGame.addEvents(this.color);
         $(this.currPos).off();
         // Récup tous les coups possibles [["A1","A2"],["B3"]] avec les endroits vides et les endroits à attaquer
         const allowedPos = this.getAllowedPos();
         const positions = allowedPos[0].concat(allowedPos[1]);
         this.displayBalls(allowedPos[0]);
+        this.enPassant = this.getEnPassant();
+        const s = this.parite();
+        if (this.enPassant.p1) {
+            if (s) {
+                const newPos = this.changePos(this.currPos, s, s);
+                if (newPos) {
+                    this.enPassant.p1 = $(newPos);
+                }
+            }
+        }
+        if (this.enPassant.p2) {
+            if (s) {
+                const newPos = this.changePos(this.currPos, -s, s);
+                if (newPos) {
+                    this.enPassant.p2 = $(newPos);
+                }
+            }
+        }
+        if (this.enPassant.p1 != null) {
+            this.enPassant.p1.html(this.ball);
+            this.enPassant.p1.on("click", this.move);
+        }
+        if (this.enPassant.p2 != null) {
+            this.enPassant.p2.html(this.ball);
+            this.enPassant.p2.on("click", this.move);
+        }
         positions.forEach((elt) => {
             elt.on("click", this.move);
         });
         this.getEmptyCases().forEach((elt) => {
             elt.on("click", () => {
                 this.removeBalls();
-                newGame.clearEvents();
-                newGame.addEvents(this.color);
+                this.clearEvents();
+                this.addEvents(this.color);
             });
         });
+        console.log("FIN ONCLICK.");
     }
     move(e) {
+        console.log("DEBUT MOVE() :");
         e.stopPropagation();
-        console.log(e.currentTarget.id);
         this.removeBalls();
-        $(this.currPos).children().appendTo(this.getID(e.currentTarget.id));
+        const s = this.parite();
+        // ? Prise en passant
+        // TODO: Tous les updates pour la prise en passant
+        if (this.enPassant.p1 &&
+            e.currentTarget.id == this.enPassant.p1.attr("id")) {
+            const attackedPos = this.changePos(this.currPos, s, 0);
+            if (attackedPos) {
+                $(attackedPos).html("");
+            }
+            $(this.currPos)
+                .children()
+                .appendTo("#" + e.currentTarget.id);
+        }
+        else if (this.enPassant.p2 &&
+            e.currentTarget.id == this.enPassant.p2.attr("id")) {
+            if (s) {
+                const attackedPos = this.changePos(this.currPos, -s, 0);
+                if (attackedPos) {
+                    $(attackedPos).html("");
+                }
+                $(this.currPos)
+                    .children()
+                    .appendTo("#" + e.currentTarget.id);
+            }
+        }
+        else if (this.currPos[2] === "7" && this.color === "w") {
+            // ? Promotion en dame
+            console.log("Promotion dame");
+            const queen = new Queen("w", "#" + e.currentTarget.id, "Z");
+            // ? Remplace le pion par une dame
+            const indexAllPieces = newGame.allPieces.indexOf(this);
+            const indexWhitePieces = newGame.whitePieces.indexOf(this);
+            console.log(indexAllPieces);
+            console.log(indexWhitePieces);
+            if (indexAllPieces != -1) {
+                newGame.allPieces[indexAllPieces] = queen;
+            }
+            if (indexWhitePieces != -1) {
+                newGame.whitePieces[indexWhitePieces] = queen;
+            }
+            // ? "Supprime" le pion
+            $(this.currPos).html("");
+            $("#" + e.currentTarget.id).html('<img src="//images.chesscomfiles.com/chess-themes/pieces/neo/150/wq.png" alt="white queen">');
+            this.currPos = "0";
+            this._promoted = true;
+            this.count++;
+        }
+        else if (this.currPos[2] === "2" && this.color === "b") {
+            console.log("Promotion dame");
+            const queen = new Queen("b", "#" + e.currentTarget.id, "Z");
+            // ? Remplace le pion par une dame.
+            const indexAllPieces = newGame.allPieces.indexOf(this);
+            const indexBlackPieces = newGame.blackPieces.indexOf(this);
+            console.log(indexAllPieces);
+            console.log(indexBlackPieces);
+            if (indexAllPieces != -1) {
+                newGame.allPieces[indexAllPieces] = queen;
+            }
+            if (indexBlackPieces != -1) {
+                newGame.blackPieces[indexBlackPieces] = queen;
+            }
+            // ? "Supprime" le pion
+            $(this.currPos).html("");
+            $("#" + e.currentTarget.id).html('<img src="//images.chesscomfiles.com/chess-themes/pieces/neo/150/bq.png" alt="black queen">');
+            this.currPos = "0";
+            this._promoted = true;
+            this.count++;
+        }
+        else if (this.displayPiece("#" + e.currentTarget.id)) {
+            // ? S'il y a une pièce sur la case destination :
+            $("#" + e.currentTarget.id).html("");
+            const attackedPiece = this.displayPiece("#" + e.currentTarget.id);
+            if (attackedPiece) {
+                attackedPiece.currPos = "0";
+            }
+            $(this.currPos).children().appendTo(this.getID(e.currentTarget.id));
+        }
+        else {
+            // ? Si la case de destination est vide
+            $(this.currPos).children().appendTo(this.getID(e.currentTarget.id));
+        }
         this.currPos = this.getID(e.currentTarget.id);
         this.count++;
         if (this.color === "b") {
@@ -56,8 +169,8 @@ export class Pawn extends Piece {
         else {
             newGame.color = "b";
         }
-        newGame.clearEvents();
-        newGame.addEvents((this.color === "b") ? "w" : "b");
+        this.clearEvents();
+        this.addEvents(this.color === "b" ? "w" : "b");
     }
     /**
      * ? Parité : 1 si noir, -1 si blanc

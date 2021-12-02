@@ -6,6 +6,7 @@ export class Queen extends Piece {
 	}
 	public onClick(e: JQuery.ClickEvent): void {
 		console.log(e);
+		console.log("move queen");
 	}
 	public move(): void {}
 	public getAllowedPos1() :JQuery<HTMLElement>[][]{

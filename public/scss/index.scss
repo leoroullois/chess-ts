@@ -25,10 +25,11 @@ h2 {
 #chess-board {
     display: flex;
     margin: auto;
-    height: 800px;
-    width: 800px;
+    height: 900px;
+    width: 900px;
     border-collapse: collapse;
-    margin-bottom: 120px;
+    align-items: center;
+    justify-content: center;
 }
 #chess-board .row td {
     height: 100px;
@@ -69,5 +70,19 @@ h2 {
     #chess-board .row td {
         height: 50px;
         width: 50px;
+    }
+}
+.active {
+    transform: rotate(180deg);
+}
+#rotate-board {
+    width: 250px;
+    height: 60px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1.3rem;
+    text-transform: uppercase;
+    &:hover {
+        background-color: rgb(221, 221, 221);
     }
 }

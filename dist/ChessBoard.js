@@ -89,7 +89,7 @@ export class ChessBoard {
         this._whitePawns = [Pa, Pb, Pc, Pd, Pe, Pf, Pg, Ph];
         this._blackPawns = [pa, pb, pc, pd, pe, pf, pg, ph];
         this._allPieces = this._blackPieces.concat(this._whitePieces);
-        this._allPieces.forEach((elt) => {
+        this._whitePieces.forEach((elt) => {
             $(elt.currPos).on("click", elt.onClick.bind(elt));
         });
     }
@@ -192,45 +192,6 @@ export class ChessBoard {
     getBlackRoc() { }
     inCheck() { }
     inCheckMate() { }
-    addEvents(color) {
-        if (color == "b") {
-            for (let k = 0; k < this.blackPieces.length; k++) {
-                if (this.blackPieces[k].currPos != "0") {
-                    $(this.blackPieces[k].currPos).on("click", this.blackPieces[k].onClick.bind(this.blackPieces[k]));
-                }
-            }
-        }
-        else {
-            for (let k = 0; k < this.whitePieces.length; k++) {
-                if (this.whitePieces[k].currPos != "0") {
-                    $(this.whitePieces[k].currPos).on("click", this.whitePieces[k].onClick.bind(this.whitePieces[k]));
-                }
-            }
-        }
-    }
-    /**
-     * ? Supprime les événements des pièces de la couleur en argument
-     * @param color "b" ou "w"
-     */
-    removeEvents(color) {
-        if (color == "b") {
-            for (let k = 0; k < this.blackPieces.length; k++) {
-                $(this.blackPieces[k].currPos).off();
-            }
-        }
-        else {
-            for (let k = 0; k < this.whitePieces.length; k++) {
-                $(this.whitePieces[k].currPos).off();
-            }
-        }
-    }
-    clearEvents() {
-        for (let i = 0; i < this.chessBoard.length; i++) {
-            for (let j = 0; j < this.chessBoard[i].length; j++) {
-                $("#" + this.chessBoard[i][j]).off();
-            }
-        }
-    }
     /**
      *
      * @returns

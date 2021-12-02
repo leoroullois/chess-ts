@@ -5,6 +5,7 @@ export class Queen extends Piece {
     }
     onClick(e) {
         console.log(e);
+        console.log("move queen");
     }
     move() { }
     getAllowedPos1() {

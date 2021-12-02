@@ -156,7 +156,7 @@ export abstract class Piece {
 				myCase.off();
 			}
 		}
-		newGame.addEvents(newGame.color);
+		this.addEvents(this.color);
 	}
 	public getEmptyCases() : JQuery<HTMLElement>[] {
 		let emptyCases : JQuery<HTMLElement>[] = [];
@@ -169,5 +169,53 @@ export abstract class Piece {
 			}
 		}
 		return emptyCases;
+	}
+	public addEvents(color: string): void {
+		if (color === "b") {
+			console.log("ADD EVENTS: black");
+			newGame.blackPieces.forEach((piece) => {
+				if (piece.currPos != "0") {
+					$(piece.currPos).on(
+						"click",
+						piece.onClick.bind(piece)
+					);
+				}
+			})
+		} else {
+			console.log("ADD EVENTS: white");
+			newGame.whitePieces.forEach((piece) => {
+				if (piece.currPos != "0") {
+					$(piece.currPos).on(
+						"click",
+						piece.onClick.bind(piece)
+					);
+				}
+			})
+		}
+	}
+	/**
+	 * ? Supprime les événements des pièces de la couleur en argument
+	 * @param color "b" ou "w"
+	 */
+	public removeEvents(color: string): void {
+		if (color == "b") {
+			console.log("REMOVE EVENT: black");
+			newGame.blackPieces.forEach((piece) => {
+				$(piece.currPos).off();
+			})
+		} else {
+			console.log("REMOVE EVENT: white");
+			newGame.whitePieces.forEach((piece) => {
+				$(piece.currPos).off();
+			})
+		}
+	}
+	public clearEvents() {
+		console.log("CLEAR EVENT.");
+		for (let i = 0; i < newGame.chessBoard.length; i++) {
+			for (let j = 0; j < newGame.chessBoard[i].length; j++) {
+				$("#"+newGame.chessBoard[i][j]).off();
+			}
+		}
 	}
 }
