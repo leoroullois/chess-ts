@@ -6,7 +6,7 @@ export class Pawn extends Piece {
         super(color, currPos, name);
         this._count = 0;
         this._promoted = false;
-        this._enPassant = { p1: null, p2: null };
+        this._enPassant = { p1: null, p2: null, passant: false };
     }
     // Getters and setters
     get count() {
@@ -25,12 +25,57 @@ export class Pawn extends Piece {
         this._enPassant = v;
     }
     getEnPassant() {
-        // TODO : bien vérifier que la case p1 ou p2 est vide !
-        return { p1: $(""), p2: $("") };
+        console.log("GetEnPassant() :");
+        let s = this.parite();
+        const id1 = this.changePos(this.currPos, s, 0);
+        let piece1 = null;
+        if (id1) {
+            piece1 = this.displayPiece(id1);
+        }
+        const id2 = this.changePos(this.currPos, -s, 0);
+        let piece2 = null;
+        if (id2) {
+            piece2 = this.displayPiece(id2);
+        }
+        // ? Si la pièce est un pion de couleur opposée, a été déplacée qu'une fois, de deux cases, au dernier coup
+        const whiteCondition = this.currPos[2] === "5" && this.color === "w";
+        const blackCondition = this.currPos[2] === "4" && this.color === "b";
+        if (whiteCondition || blackCondition) {
+            if (piece1 &&
+                piece1.name === "Pawn" &&
+                this.color != piece1.color &&
+                piece1.enPassant.passant === true) {
+                const id = this.changePos(this.currPos, s, s);
+                if (id && $(id).html() == "") {
+                    return { p1: $(id), p2: null, passant: false };
+                }
+                else {
+                    return { p1: null, p2: null, passant: false };
+                }
+            }
+            else if (piece2 &&
+                piece2.name === "Pawn" &&
+                this.color != piece2.color &&
+                piece2.enPassant.passant === true) {
+                const id = this.changePos(this.currPos, -s, s);
+                if (id && $(id).html() == "") {
+                    return { p1: null, p2: $(id), passant: false };
+                }
+                else {
+                    return { p1: null, p2: null, passant: false };
+                }
+            }
+        }
+        return { p1: null, p2: null, passant: false };
     }
     onClick(e) {
         e.stopPropagation();
-        console.log("Début onClick(e) : ", this.displayPiece("#" + e.currentTarget.id));
+        // console.log(
+        // 	"Début onClick(e) : ",
+        // 	this.displayPiece("#" + e.currentTarget.id)
+        // );
+        console.log("%c DEBUT onClick(e) :", "color:green;font-weight: 800; font-size: 1.5em;");
+        console.table(this);
         this.clearEvents();
         this.removeBalls();
         $(this.currPos).off();
@@ -39,6 +84,8 @@ export class Pawn extends Piece {
         const positions = allowedPos[0].concat(allowedPos[1]);
         this.displayBalls(allowedPos[0]);
         this.enPassant = this.getEnPassant();
+        console.log("En Passant 1 :");
+        console.table(this.enPassant);
         const s = this.parite();
         if (this.enPassant.p1) {
             if (s) {
@@ -77,28 +124,37 @@ export class Pawn extends Piece {
         console.log("FIN ONCLICK.");
     }
     move(e) {
+        console.log("%c DEBUT MOVE() :", "color:purple;font-weight: 800; font-size: 1.5em;");
         console.log("DEBUT MOVE() :");
         e.stopPropagation();
         this.removeBalls();
         const s = this.parite();
         // ? Prise en passant
         // TODO: Tous les updates pour la prise en passant
-        if (this.enPassant.p1 &&
-            e.currentTarget.id == this.enPassant.p1.attr("id")) {
+        if (this.enPassant.p1) {
+            console.log("En passant P1 :");
             const attackedPos = this.changePos(this.currPos, s, 0);
             if (attackedPos) {
                 $(attackedPos).html("");
+                const attackedPiece = this.displayPiece(attackedPos);
+                if (attackedPiece) {
+                    attackedPiece.currPos = "0";
+                }
             }
             $(this.currPos)
                 .children()
                 .appendTo("#" + e.currentTarget.id);
         }
-        else if (this.enPassant.p2 &&
-            e.currentTarget.id == this.enPassant.p2.attr("id")) {
+        else if (this.enPassant.p2) {
+            console.log("En passant P2 :");
             if (s) {
                 const attackedPos = this.changePos(this.currPos, -s, 0);
                 if (attackedPos) {
                     $(attackedPos).html("");
+                    const attackedPiece = this.displayPiece(attackedPos);
+                    if (attackedPiece) {
+                        attackedPiece.currPos = "0";
+                    }
                 }
                 $(this.currPos)
                     .children()
@@ -112,8 +168,6 @@ export class Pawn extends Piece {
             // ? Remplace le pion par une dame
             const indexAllPieces = newGame.allPieces.indexOf(this);
             const indexWhitePieces = newGame.whitePieces.indexOf(this);
-            console.log(indexAllPieces);
-            console.log(indexWhitePieces);
             if (indexAllPieces != -1) {
                 newGame.allPieces[indexAllPieces] = queen;
             }
@@ -163,31 +217,38 @@ export class Pawn extends Piece {
         }
         this.currPos = this.getID(e.currentTarget.id);
         this.count++;
+        if (this.currPos[2] === "4" && this.color === "w" && this.count === 1) {
+            this.enPassant = { p1: null, p2: null, passant: true };
+        }
+        else if (this.currPos[2] === "5" &&
+            this.color === "b" &&
+            this.count === 1) {
+            this.enPassant = { p1: null, p2: null, passant: true };
+        }
+        else {
+            this.enPassant = { p1: null, p2: null, passant: false };
+        }
         if (this.color === "b") {
             newGame.color = "w";
         }
         else {
             newGame.color = "b";
         }
+        console.log("En Passant 2 ");
+        console.table(this.enPassant);
         this.clearEvents();
         this.addEvents(this.color === "b" ? "w" : "b");
+        console.log("%c FIN MOVE();", "color:purple;font-weight: 800; font-size: 1.5em;");
     }
     /**
      * ? Parité : 1 si noir, -1 si blanc
      * @returns -1 ou 1
      */
     parite() {
-        let s;
-        if (this.color === "b" && this.delID(this.currPos) != "0") {
-            s = 1;
+        if (this.color === "b") {
+            return 1;
         }
-        else if (this.color == "w" && this.delID(this.currPos) != "0") {
-            s = -1;
-        }
-        else {
-            s = undefined;
-        }
-        return s;
+        return -1;
     }
     getAllowedPos() {
         var _a, _b;
