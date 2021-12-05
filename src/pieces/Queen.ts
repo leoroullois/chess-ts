@@ -15,27 +15,68 @@ export class Queen extends Piece {
 		this.removeBalls();
 		$(this.currPos).off();
 		// Récup tous les coups possibles [["A1","A2"],["B3"]] avec les endroits vides et les endroits à attaquer
-		const allowedPos = this.getAllowedPos();
-		// const positions = allowedPos[0].concat(allowedPos[1]);
-		console.log(allowedPos);
-		// this.displayBalls(allowedPos[0]);
-
-		// positions.forEach((elt) => {
-		// 	elt.on("click", this.move);
-		// });
-		// this.getEmptyCases().forEach((elt) => {
-		// 	elt.on("click", () => {
-		// 		this.removeBalls();
-		// 		this.clearEvents();
-		// 		this.addEvents(this.color);
+		const allowedPos: JQuery<HTMLElement>[][] = this.getAllowedPos();
+		const positions = allowedPos.flat();
+		// const positions : JQuery<HTMLElement>[] = pos.filter((elt) => elt!=[]);
+		console.log({ allowedPos });
+		console.log({ positions });
+		// allowedPos.forEach((data) => {
+		// 	let dataset = [...data];
+		// 	dataset.filter((elt) => {
+		// 		return elt.html() === "";
 		// 	});
+		// 	this.displayBalls(dataset);
 		// });
+		let dataset = positions.filter((elt) => {
+			const id="#"+elt.attr("id");
+			if(id) {
+				return this.displayPiece(id)==null;
+			}
+			return false;
+		})
+		console.log(dataset);
+		this.displayBalls(dataset);
+		positions.forEach((elt) => {
+			elt.on("click", this.move);
+		});
+		this.getEmptyCases().forEach((elt) => {
+			elt.on("click", () => {
+				this.removeBalls();
+				this.clearEvents();
+				this.addEvents(this.color);
+			});
+		});
 		console.log(
 			"%c FIN ONCLICK.",
 			"color:green;font-weight: 800; font-size: 1.5em;"
 		);
 	}
-	public move(): void {}
+	public move(e: JQuery.ClickEvent): void {
+		e.stopPropagation();
+		this.removeBalls();
+		if (this.displayPiece("#" + e.currentTarget.id)) {
+			// ? S'il y a une pièce sur la case destination :
+			$("#" + e.currentTarget.id).html("");
+			const attackedPiece = this.displayPiece("#" + e.currentTarget.id);
+			if (attackedPiece) {
+				attackedPiece.currPos = "0";
+			}
+			$(this.currPos).children().appendTo(this.getID(e.currentTarget.id));
+		} else {
+			// ? Si la case de destination est vide
+			$(this.currPos).children().appendTo(this.getID(e.currentTarget.id));
+		}
+		this.currPos = this.getID(e.currentTarget.id);
+
+		if (this.color === "b") {
+			newGame.color = "w";
+		} else {
+			newGame.color = "b";
+		}
+		this.clearEvents();
+		this.addEvents(this.color === "b" ? "w" : "b");
+	}
+
 	public getAllowedPos1(): JQuery<HTMLElement>[][] {
 		const currID = this.currPos;
 		const color = this.color;
@@ -80,7 +121,7 @@ export class Queen extends Piece {
 		diags.forEach((diag) => {
 			let diagBis = [];
 			let k = 0;
-			while (k < diag.length && this.displayPiece(diag[k]) == null) {
+			do {
 				if (this.displayPiece(diag[k]) != null) {
 					if (this.displayPiece(diag[k])?.color != color) {
 						diagBis.push($(diag[k]));
@@ -89,7 +130,7 @@ export class Queen extends Piece {
 					diagBis.push($(diag[k]));
 				}
 				k++;
-			}
+			}while (k < diag.length && this.displayPiece(diag[k-1]) == null);
 			positions.push(diagBis);
 		});
 		return positions;
@@ -135,11 +176,10 @@ export class Queen extends Piece {
 		row4 = row4.map((elt) => this.arrToStr(elt));
 		let positions: JQuery<HTMLElement>[][] = [];
 		const rows = [row1, row2, row3, row4];
-		console.log("rows :",rows);
 		rows.forEach((row) => {
 			let rowBis = [];
 			let k = 0;
-			while (k < row.length && this.displayPiece(row[k]) == null) {
+			do {
 				if (this.displayPiece(row[k]) != null) {
 					if (this.displayPiece(row[k])?.color != color) {
 						rowBis.push($(row[k]));
@@ -148,10 +188,9 @@ export class Queen extends Piece {
 					rowBis.push($(row[k]));
 				}
 				k++;
-			}
+			} while (k < row.length && this.displayPiece(row[k-1]) == null);
 			positions.push(rowBis);
 		});
-		console.log("positions :", positions);
 		return positions;
 	}
 	public getAllowedPos(): JQuery<HTMLElement>[][] {
