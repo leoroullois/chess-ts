@@ -21,12 +21,17 @@ export class King extends Piece {
 		this.clearEvents();
 		this.removeBalls();
 		$(this.currPos).off();
-		// Récup tous les coups possibles [["A1","A2"],["B3"]] avec les endroits vides et les endroits à attaquer
-		const allowedPos = this.getAllowedPos();
-		const positions = allowedPos[0].concat(allowedPos[1]);
-		console.log(allowedPos);
-		this.displayBalls(allowedPos[0]);
+		const allowedPos: JQuery<HTMLElement>[][] = this.getAllowedPos();
+		const positions: JQuery<HTMLElement>[] = allowedPos.flat();
 
+		let dataset = positions.filter((elt) => {
+			const id = "#" + elt.attr("id");
+			if (id) {
+				return this.displayPiece(id) == null;
+			}
+			return false;
+		});
+		this.displayBalls(dataset);
 		positions.forEach((elt) => {
 			elt.on("click", this.move);
 		});
@@ -37,9 +42,36 @@ export class King extends Piece {
 				this.addEvents(this.color);
 			});
 		});
-		console.log("%c FIN ONCLICK.","color:green;font-weight: 800; font-size: 1.5em;");
+		console.log(
+			"%c FIN ONCLICK.",
+			"color:green;font-weight: 800; font-size: 1.5em;"
+		);
 	}
-	public move(): void {}
+	public move(e: JQuery.ClickEvent): void {
+		e.stopPropagation();
+		this.removeBalls();
+		if (this.displayPiece("#" + e.currentTarget.id)) {
+			// ? S'il y a une pièce sur la case destination :
+			$("#" + e.currentTarget.id).html("");
+			const attackedPiece = this.displayPiece("#" + e.currentTarget.id);
+			if (attackedPiece) {
+				attackedPiece.currPos = "0";
+			}
+			$(this.currPos).children().appendTo(this.getID(e.currentTarget.id));
+		} else {
+			// ? Si la case de destination est vide
+			$(this.currPos).children().appendTo(this.getID(e.currentTarget.id));
+		}
+		this.currPos = this.getID(e.currentTarget.id);
+
+		if (this.color === "b") {
+			newGame.color = "w";
+		} else {
+			newGame.color = "b";
+		}
+		this.clearEvents();
+		this.addEvents(this.color === "b" ? "w" : "b");
+	}
 	public getAllowedPos(): JQuery<HTMLElement>[][] {
 		const currID = this.currPos;
 		const color = this.color;
@@ -56,12 +88,14 @@ export class King extends Piece {
 		positions.push([i - 1, j - 1]);
 
 		positions = positions.filter((elt) => {
-			return this.arrToStr(elt) != undefined;
+			const cond1 = elt[0] >= 0 && 7 >= elt[0];
+			const cond2 = elt[1] >= 0 && 7 >= elt[1];
+			return cond1 && cond2;
 		});
 		let positions2: string[] = positions.map((elt) => this.arrToStr(elt));
 		positions2 = positions2.filter((elt) => {
 			const piece = this.displayPiece(elt);
-			return piece?.color!=color;
+			return piece?.color != color;
 		});
 		let positions3: JQuery<HTMLElement>[] = positions2.map((elt) => $(elt));
 		return [positions3];
