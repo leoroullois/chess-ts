@@ -11,19 +11,8 @@ export class Queen extends Piece {
         this.clearEvents();
         this.removeBalls();
         $(this.currPos).off();
-        // Récup tous les coups possibles [["A1","A2"],["B3"]] avec les endroits vides et les endroits à attaquer
         const allowedPos = this.getAllowedPos();
         const positions = allowedPos.flat();
-        // const positions : JQuery<HTMLElement>[] = pos.filter((elt) => elt!=[]);
-        console.log({ allowedPos });
-        console.log({ positions });
-        // allowedPos.forEach((data) => {
-        // 	let dataset = [...data];
-        // 	dataset.filter((elt) => {
-        // 		return elt.html() === "";
-        // 	});
-        // 	this.displayBalls(dataset);
-        // });
         let dataset = positions.filter((elt) => {
             const id = "#" + elt.attr("id");
             if (id) {
@@ -31,7 +20,6 @@ export class Queen extends Piece {
             }
             return false;
         });
-        console.log(dataset);
         this.displayBalls(dataset);
         positions.forEach((elt) => {
             elt.on("click", this.move);
