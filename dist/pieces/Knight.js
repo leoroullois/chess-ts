@@ -1,4 +1,5 @@
 import { Piece } from "../Piece.js";
+import { newGame } from "../app.js";
 export class Knight extends Piece {
     constructor(color, currPos, name) {
         super(color, currPos, name);
@@ -10,11 +11,16 @@ export class Knight extends Piece {
         this.clearEvents();
         this.removeBalls();
         $(this.currPos).off();
-        // Récup tous les coups possibles [["A1","A2"],["B3"]] avec les endroits vides et les endroits à attaquer
         const allowedPos = this.getAllowedPos();
-        const positions = allowedPos[0].concat(allowedPos[1]);
-        console.log(allowedPos);
-        this.displayBalls(allowedPos[0]);
+        const positions = allowedPos.flat();
+        let dataset = positions.filter((elt) => {
+            const id = "#" + elt.attr("id");
+            if (id) {
+                return this.displayPiece(id) == null;
+            }
+            return false;
+        });
+        this.displayBalls(dataset);
         positions.forEach((elt) => {
             elt.on("click", this.move);
         });
@@ -27,7 +33,32 @@ export class Knight extends Piece {
         });
         console.log("%c FIN ONCLICK.", "color:green;font-weight: 800; font-size: 1.5em;");
     }
-    move() { }
+    move(e) {
+        e.stopPropagation();
+        this.removeBalls();
+        if (this.displayPiece("#" + e.currentTarget.id)) {
+            // ? S'il y a une pièce sur la case destination :
+            $("#" + e.currentTarget.id).html("");
+            const attackedPiece = this.displayPiece("#" + e.currentTarget.id);
+            if (attackedPiece) {
+                attackedPiece.currPos = "0";
+            }
+            $(this.currPos).children().appendTo(this.getID(e.currentTarget.id));
+        }
+        else {
+            // ? Si la case de destination est vide
+            $(this.currPos).children().appendTo(this.getID(e.currentTarget.id));
+        }
+        this.currPos = this.getID(e.currentTarget.id);
+        if (this.color === "b") {
+            newGame.color = "w";
+        }
+        else {
+            newGame.color = "b";
+        }
+        this.clearEvents();
+        this.addEvents(this.color === "b" ? "w" : "b");
+    }
     getAllowedPos() {
         const currID = this.currPos;
         const color = this.color;
@@ -43,7 +74,9 @@ export class Knight extends Piece {
         positions.push([i - 2, j - 1]);
         positions.push([i - 2, j + 1]);
         positions = positions.filter((elt) => {
-            return this.arrToStr(elt) != undefined;
+            const cond1 = elt[0] >= 0 && 7 >= elt[0];
+            const cond2 = elt[1] >= 0 && 7 >= elt[1];
+            return cond1 && cond2;
         });
         let positions2 = positions.map((elt) => this.arrToStr(elt));
         positions2 = positions2.filter((elt) => {
