@@ -35,7 +35,10 @@ export class Pawn extends Piece {
 	public set enPassant(v: PassantType) {
 		this._enPassant = v;
 	}
-
+	/**
+	 * Prise en passant.
+	 * @returns Un objet qui représente toute les informations a propos de la prise en passant
+	 */
 	public getEnPassant(): PassantType {
 		console.log("GetEnPassant() :");
 		let s = this.parite();
@@ -81,12 +84,12 @@ export class Pawn extends Piece {
 		}
 		return { p1: null, p2: null, passant: false };
 	}
+	/**
+	 * Gère la dispositions des petites boules et des nouveaux événements
+	 * @param e événement de click sur une pièce
+	 */
 	public onClick(e: JQuery.ClickEvent): void {
 		e.stopPropagation();
-		// console.log(
-		// 	"Début onClick(e) : ",
-		// 	this.displayPiece("#" + e.currentTarget.id)
-		// );
 		console.log(
 			"%c DEBUT onClick(e) :",
 			"color:green;font-weight: 800; font-size: 1.5em;"
@@ -101,8 +104,6 @@ export class Pawn extends Piece {
 
 		this.displayBalls(allowedPos[0]);
 		this.enPassant = this.getEnPassant();
-		console.log("En Passant 1 :");
-		console.table(this.enPassant);
 		const s = this.parite();
 		if (this.enPassant.p1) {
 			if (s) {
@@ -138,21 +139,18 @@ export class Pawn extends Piece {
 				this.addEvents(this.color);
 			});
 		});
-		console.log("FIN ONCLICK.");
+		console.log("%c FIN ONCLICK.","color:green;font-weight: 800; font-size: 1.5em;");
 	}
+	/**
+	 * Procédure faisant bouger la pièce à l'endroit souhaiter et mets à jours toute les informations
+	 * @param e événement de click sur la case de destination
+	 */
 	public move(e: JQuery.ClickEvent): void {
-		console.log(
-			"%c DEBUT MOVE() :",
-			"color:purple;font-weight: 800; font-size: 1.5em;"
-		);
-		console.log("DEBUT MOVE() :");
 		e.stopPropagation();
 		this.removeBalls();
 		const s = this.parite();
 		// ? Prise en passant
-		// TODO: Tous les updates pour la prise en passant
 		if (this.enPassant.p1) {
-			console.log("En passant P1 :");
 			const attackedPos = this.changePos(this.currPos, s, 0);
 			if (attackedPos) {
 				$(attackedPos).html("");
@@ -165,7 +163,6 @@ export class Pawn extends Piece {
 				.children()
 				.appendTo("#" + e.currentTarget.id);
 		} else if (this.enPassant.p2) {
-			console.log("En passant P2 :");
 			if (s) {
 				const attackedPos = this.changePos(this.currPos, -s, 0);
 				if (attackedPos) {
@@ -182,7 +179,7 @@ export class Pawn extends Piece {
 		} else if (this.currPos[2] === "7" && this.color === "w") {
 			// ? Promotion en dame
 			console.log("Promotion dame");
-			const queen = new Queen("w", "#" + e.currentTarget.id, "Z");
+			const queen = new Queen("w", "#" + e.currentTarget.id, "Queen");
 			// ? Remplace le pion par une dame
 			const indexAllPieces: number = newGame.allPieces.indexOf(this);
 			const indexWhitePieces: number = newGame.whitePieces.indexOf(this);
@@ -202,7 +199,7 @@ export class Pawn extends Piece {
 			this.count++;
 		} else if (this.currPos[2] === "2" && this.color === "b") {
 			console.log("Promotion dame");
-			const queen = new Queen("b", "#" + e.currentTarget.id, "Z");
+			const queen = new Queen("b", "#" + e.currentTarget.id, "Queen");
 			// ? Remplace le pion par une dame.
 			const indexAllPieces: number = newGame.allPieces.indexOf(this);
 			const indexBlackPieces: number = newGame.blackPieces.indexOf(this);
@@ -252,14 +249,8 @@ export class Pawn extends Piece {
 		} else {
 			newGame.color = "b";
 		}
-		console.log("En Passant 2 ");
-		console.table(this.enPassant);
 		this.clearEvents();
 		this.addEvents(this.color === "b" ? "w" : "b");
-		console.log(
-			"%c FIN MOVE();",
-			"color:purple;font-weight: 800; font-size: 1.5em;"
-		);
 	}
 	/**
 	 * ? Parité : 1 si noir, -1 si blanc

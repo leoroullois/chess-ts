@@ -5,9 +5,32 @@ export class Bishop extends Piece {
 		super(color, currPos, name);
 	}
 	public onClick(e: JQuery.ClickEvent): void {
-		console.log(e);
-		const allPos : JQuery<HTMLElement>[][] = this.getAllowedPos();
-		console.log(allPos);
+		e.stopPropagation();
+		console.log(
+			"%c DEBUT onClick(e) :",
+			"color:green;font-weight: 800; font-size: 1.5em;"
+		);
+		console.table(this);
+		this.clearEvents();
+		this.removeBalls();
+		$(this.currPos).off();
+		// Récup tous les coups possibles [["A1","A2"],["B3"]] avec les endroits vides et les endroits à attaquer
+		const allowedPos = this.getAllowedPos();
+		const positions = allowedPos[0].concat(allowedPos[1]);
+		console.log(allowedPos);
+		this.displayBalls(allowedPos[0]);
+
+		positions.forEach((elt) => {
+			elt.on("click", this.move);
+		});
+		this.getEmptyCases().forEach((elt) => {
+			elt.on("click", () => {
+				this.removeBalls();
+				this.clearEvents();
+				this.addEvents(this.color);
+			});
+		});
+		console.log("%c FIN ONCLICK.","color:green;font-weight: 800; font-size: 1.5em;");
 	}
 	public move(): void {}
 	public getAllowedPos(): JQuery<HTMLElement>[][] {
